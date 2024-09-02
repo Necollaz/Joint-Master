@@ -13,11 +13,19 @@ public class Catapult : MonoBehaviour
 
     private SpringJoint _springJoint;
     private Projectile _currentProjectile;
+    private KeyCode _fireKey = KeyCode.E;
+    private KeyCode _reloadKey = KeyCode.R;
     private bool _isLoaded = true;
 
     private void Awake()
     {
         _springJoint = _spoon.GetComponent<SpringJoint>();
+
+        if(_springJoint == null)
+        {
+            Debug.LogError("Компонент SpringJoint не найден на объекте ложка.");
+            enabled = false;
+        }
     }
 
     private void Start()
@@ -30,16 +38,16 @@ public class Catapult : MonoBehaviour
 
     private void Update()
     {
-        PlayerInput();
+        ProcessPlayerInput();
     }
 
-    private void PlayerInput()
+    private void ProcessPlayerInput()
     {
-        if (Input.GetKeyDown(KeyCode.E) && _isLoaded)
+        if (Input.GetKeyDown(_fireKey) && _isLoaded)
         {
             Fire();
         }
-        else if (Input.GetKeyDown(KeyCode.R))
+        else if (Input.GetKeyDown(_reloadKey))
         {
             Reload();
         }
@@ -57,12 +65,14 @@ public class Catapult : MonoBehaviour
     private void Reload()
     {
         _springJoint.connectedAnchor = _anchorStart.position;
+
         StartCoroutine(SpawnProjectile());
     }
 
     private IEnumerator SpawnProjectile()
     {
         yield return new WaitForSeconds(_delay);
+
         _currentProjectile = Instantiate(_prefab, _projectileSpawnPoint.position, Quaternion.identity);
         _isLoaded = true;
     }
